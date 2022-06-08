@@ -671,6 +671,10 @@ public class LoggerConfig extends AbstractFilterable implements LocationAware {
     protected void callAppenders(final LogEvent event) {
         final AppenderControl[] controls = appenders.get();
         //noinspection ForLoopReplaceableByForEach
+
+        // ============================================================
+        // 遍历logger配置的所有appender，然后把日志打出来！！！！！
+        // ============================================================
         for (int i = 0; i < controls.length; i++) {
             controls[i].callAppender(event);
         }
