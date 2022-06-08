@@ -534,6 +534,11 @@ public abstract class ConfigurationFactory extends ConfigurationBuilderFactory {
             return null;
         }
 
+        /**
+         * =======================================
+         * 这里就是Log4J2框架读取xml配置的地方
+         * =======================================
+         */
         private Configuration getConfiguration(final LoggerContext loggerContext, final boolean isTest, final String name) {
             final boolean named = Strings.isNotEmpty(name);
             final ClassLoader loader = LoaderUtil.getThreadContextClassLoader();
