@@ -42,6 +42,10 @@ import org.apache.logging.log4j.util.PropertiesUtil;
 import org.apache.logging.log4j.util.Strings;
 
 /**
+ * StatusLogger是用来记录Log4J2这个日志系统内部所发生的事件。就是日志系统内部的日志，是用它打的。
+ *
+ *
+ *
  * Records events that occur in the logging system. By default, only error messages are logged to {@link System#err}.
  * Normally, the Log4j StatusLogger is configured via the root {@code <Configuration status="LEVEL"/>} node in a Log4j
  * configuration file. However, this can be overridden via a system property named
