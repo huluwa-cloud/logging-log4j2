@@ -120,6 +120,10 @@ public abstract class ConfigurationFactory extends ConfigurationBuilderFactory {
 
     /**
      * File name prefix for standard configurations.
+     *
+     * 标准配置的文件名前缀。
+     * （为什么不直接写为log4j2.xml呢？因为log4j2支持多个格式的配置文件，其它，比如json，yaml，properties等等）
+     *
      */
     protected static final String DEFAULT_PREFIX = "log4j2";
 
@@ -381,6 +385,10 @@ public abstract class ConfigurationFactory extends ConfigurationBuilderFactory {
 
     /**
      * Default Factory.
+     *
+     * 本类ConfigurationFactory是一个抽象类。它可以有很多子类。
+     * 但是这里[以静态内部类的形式]定义了一个默认的子类Factory.
+     *
      */
     private static class Factory extends ConfigurationFactory {
 
@@ -538,6 +546,23 @@ public abstract class ConfigurationFactory extends ConfigurationBuilderFactory {
          * =======================================
          * 这里就是Log4J2框架读取xml配置的地方
          * =======================================
+         *
+         * 一条典型的调用链：
+         * 	  at org.apache.logging.log4j.core.config.ConfigurationFactory$Factory.getConfiguration(ConfigurationFactory.java:556)
+         * 	  at org.apache.logging.log4j.core.config.ConfigurationFactory$Factory.getConfiguration(ConfigurationFactory.java:483)
+         * 	  at org.apache.logging.log4j.core.config.ConfigurationFactory.getConfiguration(ConfigurationFactory.java:325)
+         * 	  at org.apache.logging.log4j.core.LoggerContext.reconfigure(LoggerContext.java:690)
+         * 	  at org.apache.logging.log4j.core.LoggerContext.reconfigure(LoggerContext.java:711)
+         * 	  at org.apache.logging.log4j.core.LoggerContext.start(LoggerContext.java:253)
+         * 	  at org.apache.logging.log4j.core.impl.Log4jContextFactory.getContext(Log4jContextFactory.java:245)
+         * 	  at org.apache.logging.log4j.core.impl.Log4jContextFactory.getContext(Log4jContextFactory.java:47)
+         * 	  at org.apache.logging.log4j.LogManager.getContext(LogManager.java:176)
+         * 	  at org.apache.logging.log4j.LogManager.getLogger(LogManager.java:666)
+         * 	  at log.LogWithConfigFile.<clinit>(LogWithConfigFile.java:12)
+         *
+         * @see LoggerContext#start()
+         * @see LoggerContext#reconfigure()
+         *
          */
         private Configuration getConfiguration(final LoggerContext loggerContext, final boolean isTest, final String name) {
             final boolean named = Strings.isNotEmpty(name);
@@ -554,13 +579,30 @@ public abstract class ConfigurationFactory extends ConfigurationBuilderFactory {
                     if (suffix.equals(ALL_TYPES)) {
                         continue;
                     }
+                    // 就是在这里拼凑出的log4j2.xml
                     configName = named ? prefix + name + suffix : prefix + suffix;
-
+                    /**
+                     *
+                     * 传进去的是log4j2.xml，出来的就是绝对路径了。
+                     * core.config.ConfigurationSource#fromResource(java.lang.String, java.lang.ClassLoader)方法，
+                     * 就是从classpath去做了寻找的。
+                     *
+                     */
+                    /**
+                     * 通过文件名，获得具有[配置文件]的输入流和配置数据的[字节数据]的 ConfigurationSource。
+                     * ConfigurationSource里面包含这两样核心的东西。
+                     */
                     final ConfigurationSource source = ConfigurationSource.fromResource(configName, loader);
                     if (source != null) {
                         if (!factory.isActive()) {
                             LOGGER.warn("Found configuration file {} for inactive ConfigurationFactory {}", configName, factory.getClass().getName());
                         }
+                        /**
+                         * 这里的getConfiguration方法，就是将source中的配置数据的[字节数据]，转化为我们Java最为擅长操弄的对象。
+                         * 就是定义的Configuration对象。
+                         *
+                         * @see Configuration
+                         */
                         return factory.getConfiguration(loggerContext, source);
                     }
                 }
