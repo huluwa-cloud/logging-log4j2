@@ -18,6 +18,11 @@ package org.apache.logging.log4j.internal;
 
 /**
  * Keeps track of LogManager initialization status;
+ *
+ * 看代码的时候，发现，专门建了一个类来处理LogManager的状态。觉得有点鸡肋。
+ * 果然，这个类是2020年12月11日才加上去的。
+ * 是为了处理跟spring-boot的集成问题
+ *
  */
 public class LogManagerStatus {
 
