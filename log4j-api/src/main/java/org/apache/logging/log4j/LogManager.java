@@ -44,6 +44,23 @@ import org.apache.logging.log4j.util.Strings;
  * are obtained through the {@link #getFormatterLogger(Class)} family of methods. Other service provider methods are
  * given through the {@link #getContext()} and {@link #getFactory()} family of methods; these methods are not normally
  * useful for typical usage of Log4j.
+ * <p></p>
+ *
+ * Log4j 日志记录系统的定位点。
+ *
+ * 此类最常见的用法是获取一个命名的 Logger。
+ *
+ * getLogger() 方法是根据调用类名获取命名 Logger 的最便捷方式。
+ *
+ *
+ * 此类还提供了用于获取命名记录器的方法，这些记录器使用 String.format(String, Object...) 样式消息而不是默认类型的参数化消息。
+ * 这些是通过 getFormatterLogger(Class) 系列方法获得的。
+ * 其他服务提供者方法通过 getContext() 和 getFactory() 系列方法提供；对于Log4j的经典使用来讲，这些方法不是太有用。
+ *
+ *
+ * !!!!!!!!!!!!!!! LogManager是一个Log4j2日志系统的入口类，同时他也是一个工厂类.!!!!!!!!!!!!!!!!
+ *
+ *
  */
 public class LogManager {
 
@@ -63,15 +80,32 @@ public class LogManager {
     // for convenience
     private static final String FQCN = LogManager.class.getName();
 
+    /**
+     *
+     * factory是一个类变量，而且在类初始化<clinit>的时候被赋值。
+     * 默认是给了Log4jContextFactory实例。
+     *
+     */
     private static volatile LoggerContextFactory factory;
 
     /**
-     * Scans the classpath to find all logging implementation. Currently, only one will be used but this could be
-     * extended to allow multiple implementations to be used.
+     *
+     * Scans the classpath to find all logging implementation.
+     * Currently, only one will be used but this could be extended to allow multiple implementations to be used.
+     *
+     * 扫描classpath来找到所有的logging实现。
+     *
+     */
+    /**
+     *
+     * 这段LogManager类初始化<clinit>的逻辑，值得关注。
+     * 这里面用了JDK的ServiceLoader SPI机制
+     *
      */
     static {
         // Shortcut binding to force a specific logging implementation.
         final PropertiesUtil managerProps = PropertiesUtil.getProperties();
+        // ================ 如果在properties中用全限定名指定了实现（但一般没有指定），那么就直接反射创建  begin ========
         final String factoryClassName = managerProps.getStringProperty(FACTORY_PROPERTY_NAME);
         if (factoryClassName != null) {
             try {
@@ -82,20 +116,33 @@ public class LogManager {
                 LOGGER.error("Unable to create configured LoggerContextFactory {}", factoryClassName, ex);
             }
         }
+        // ================ 如果在properties中用全限定名指定了实现，那么就直接反射创建  end ========
 
         if (factory == null) {
+
+            // 注意这里用了TreeMap，因为要排序
+
             final SortedMap<Integer, LoggerContextFactory> factories = new TreeMap<>();
             // note that the following initial call to ProviderUtil may block until a Provider has been installed when
             // running in an OSGi environment
             if (ProviderUtil.hasProviders()) {
+                /*
+                 *
+                 * 这里用了ServiceLoader SPI机制，所以说Log4j2是做了可扩展设计的
+                 *
+                 * Log4j2原生就只有一个 Log4jProvider
+                 *
+                 */
                 for (final Provider provider : ProviderUtil.getProviders()) {
                     final Class<? extends LoggerContextFactory> factoryClass = provider.loadLoggerContextFactory();
                     if (factoryClass != null) {
                         try {
                             factories.put(provider.getPriority(), factoryClass.newInstance());
                         } catch (final Exception e) {
-                            LOGGER.error("Unable to create class {} specified in provider URL {}", factoryClass.getName(), provider
-                                    .getUrl(), e);
+                            LOGGER.error("Unable to create class {} specified in provider URL {}",
+                                    factoryClass.getName(),
+                                    provider.getUrl(),
+                                    e);
                         }
                     }
                 }
@@ -123,11 +170,15 @@ public class LogManager {
                 factory = SimpleLoggerContextFactory.INSTANCE;
             }
         }
+        // 执行完static语句块的代码，那么就可以标识LogManager这个类已经初始化完毕了。
         LogManagerStatus.setInitialized(true);
     }
 
     /**
+     *
      * Prevents instantiation
+     * protected权限，也就是不允许使用开发者去new LogManager，只能调用它的工厂方法获取Logger或者LoggerContext.
+     *
      */
     protected LogManager() {
     }

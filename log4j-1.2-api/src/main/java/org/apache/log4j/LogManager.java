@@ -31,6 +31,8 @@ import org.apache.logging.log4j.spi.LoggerContext;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 
 /**
+ * 这个已经是老的log4j1的入口了。
+ *
  * The main entry point to Log4j 1.
  */
 public final class LogManager {
