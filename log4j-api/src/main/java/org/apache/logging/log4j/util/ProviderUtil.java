@@ -34,6 +34,9 @@ import org.apache.logging.log4j.status.StatusLogger;
  * <em>Consider this class private.</em> Utility class for Log4j {@link Provider}s. When integrating with an application
  * container framework, any Log4j Providers not accessible through standard classpath scanning should
  * {@link #loadProvider(java.net.URL, ClassLoader)} a classpath accordingly.
+ *
+ * 核心入口实用类LogManager使用了ProviderUtil，用了它的仅有的两个public方法[getProviders]和 [hasProviders]
+ *
  */
 public final class ProviderUtil {
 
@@ -44,6 +47,9 @@ public final class ProviderUtil {
 
     /**
      * Loaded providers.
+     *
+     * 缓存Provider的容器
+     *
      */
     protected static final Collection<Provider> PROVIDERS = new HashSet<>();
 
@@ -62,9 +68,15 @@ public final class ProviderUtil {
     // wait for a Provider to be installed. See LOG4J2-373
     private static volatile ProviderUtil instance;
 
+    /**
+     * 私有化构造器。（这是单例模式的前兆了）
+     */
     private ProviderUtil() {
         for (final ClassLoader classLoader : LoaderUtil.getClassLoaders()) {
             try {
+                /**
+                 * 在构造器里面，通过Java的SPI机制加载了 org.apache.logging.log4j.spi.Provider
+                 */
                 loadProviders(classLoader);
             } catch (final Throwable ex) {
                 LOGGER.debug("Unable to retrieve provider from ClassLoader {}", classLoader, ex);
@@ -101,7 +113,9 @@ public final class ProviderUtil {
     }
 
 	/**
-	 * 
+	 *
+     * 在这里加载Log4J2框架扩展的Provider
+     *
 	 * @param classLoader null can be used to mark the bootstrap class loader.
 	 */
 	protected static void loadProviders(final ClassLoader classLoader) {
@@ -124,7 +138,13 @@ public final class ProviderUtil {
             }
         }
     }
+// =============================  ProviderUtil就只有这两个public方法提供给包外访问  ============================
+// 其它的方法，都通过private或者protected隐藏了起来
+// ProviderUtil就只有这两个public方法提供给包外访问，所以可以体会这个类的设计
 
+    /**
+     * 返回的是迭代器
+     */
     public static Iterable<Provider> getProviders() {
         lazyInit();
         return PROVIDERS;
@@ -134,11 +154,16 @@ public final class ProviderUtil {
         lazyInit();
         return !PROVIDERS.isEmpty();
     }
+// ============================================  end ======================================================
 
     /**
      * Lazily initializes the ProviderUtil singleton.
      *
      * @since 2.1
+     *
+     * 懒汉模式的单例。
+     * 用double check locking的方式（ DoubleCheckedLocking ）
+     *
      */
     protected static void lazyInit() {
         // noinspection DoubleCheckedLocking
