@@ -212,6 +212,9 @@ public abstract class AbstractConfiguration extends AbstractFilterable implement
         return asyncLoggerConfigDisruptor;
     }
 
+    // ================================================================================================= initialize
+    // ================================================================================================= initialize
+    // ================================================================================================= initialize
     /**
      * Initialize the configuration.
      */
@@ -244,15 +247,25 @@ public abstract class AbstractConfiguration extends AbstractFilterable implement
                 }
             }
         }
+        /**
+         *
+         * setup，是读取配置文件，组装好那一堆的Node（树形结构）
+         *
+         */
         setup();
         setupAdvertisement();
+
+        // 终极核心的一步。
+        // 那些Appender对象的生成都是在这里面。
         doConfigure();
+
+        // 对应的生命周期LifeCycle步骤完成，然后执行setState更新对象的状态。
+        // 这已经是模板代码了。每个生命周期步骤的代码里面，最有一定是会有这个方法的调用的。
         setState(State.INITIALIZED);
         LOGGER.debug("Configuration {} initialized", this);
     }
 
-    protected void initializeWatchers(Reconfigurable reconfigurable, ConfigurationSource configSource,
-        int monitorIntervalSeconds) {
+    protected void initializeWatchers(Reconfigurable reconfigurable, ConfigurationSource configSource, int monitorIntervalSeconds) {
         if (configSource != null && (configSource.getFile() != null || configSource.getURL() != null)) {
             if (monitorIntervalSeconds > 0) {
                 watchManager.setIntervalSeconds(monitorIntervalSeconds);
@@ -285,6 +298,9 @@ public abstract class AbstractConfiguration extends AbstractFilterable implement
         }
     }
 
+    // ================================================================================================= start
+    // ================================================================================================= start
+    // ================================================================================================= start
 	/**
      * Start the configuration.
      */
@@ -680,6 +696,11 @@ public abstract class AbstractConfiguration extends AbstractFilterable implement
                 copy.add(child.getObject(CustomLevelConfig.class));
                 customLevels = copy;
             } else {
+                /**
+                 *
+                 * 如果子层级不是这些元素，那么就打印错误日志。
+                 *
+                 */
                 final List<String> expected = Arrays.asList("\"Appenders\"", "\"Loggers\"", "\"Properties\"",
                         "\"Scripts\"", "\"CustomLevels\"");
                 LOGGER.error("Unknown object \"{}\" of type {} is ignored: try nesting it inside one of: {}.",
@@ -702,6 +723,9 @@ public abstract class AbstractConfiguration extends AbstractFilterable implement
             for (final AppenderRef ref : loggerConfig.getAppenderRefs()) {
                 final Appender app = appenders.get(ref.getRef());
                 if (app != null) {
+
+                    // ??????????????????????????????????????????????
+
                     loggerConfig.addAppender(app, ref.getLevel(), ref.getFilter());
                 } else {
                     LOGGER.error("Unable to locate appender \"{}\" for logger config \"{}\"", ref.getRef(),
@@ -1029,21 +1053,32 @@ public abstract class AbstractConfiguration extends AbstractFilterable implement
         setParents();
     }
 
+    /**
+     *
+     * 这里用了递归，createConfiguration中调用了createConfiguration。
+     *
+     *
+     */
     @Override
     public void createConfiguration(final Node node, final LogEvent event) {
         final PluginType<?> type = node.getType();
+        // 递归终止条件1
         if (type != null && type.isDeferChildren()) {
+            // 创建plugin对象
             node.setObject(createPluginObject(type, node, event));
         } else {
+            // node.getChildren()默认是一个空list
+            // 递归终止条件2：如果node.getChildren()是一个空的list
             for (final Node child : node.getChildren()) {
                 createConfiguration(child, event);
             }
-
             if (type == null) {
                 if (node.getParent() != null) {
                     LOGGER.error("Unable to locate plugin for {}", node.getName());
                 }
             } else {
+                // 创建plugin对象
+                // Appender对象就是在这里创建出来的
                 node.setObject(createPluginObject(type, node, event));
             }
         }
@@ -1162,6 +1197,9 @@ public abstract class AbstractConfiguration extends AbstractFilterable implement
     }
 
     /**
+     *
+     * 将配置（文件或者其它的兴盛）输入流（读取出来）转化为字节组数 的一个静态工具方法
+     *
      * Reads an InputStream using buffered reads into a byte array buffer. The given InputStream will remain open after
      * invocation of this method.
      *

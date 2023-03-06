@@ -16,5 +16,8 @@
  */
 /**
  * Provides Asynchronous Logger classes and interfaces for low-latency logging.
+ *
+ * 实现异步logger的相关类都放到这个包下
+ *
  */
 package org.apache.logging.log4j.core.async;

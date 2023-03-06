@@ -69,6 +69,11 @@ public class XmlConfiguration extends AbstractConfiguration implements Reconfigu
     private static final String[] VERBOSE_CLASSES = new String[] {ResolverUtil.class.getName()};
     private static final String LOG4J_XSD = "Log4j-config.xsd";
 
+
+    /**
+     * 核心的属性基本都在AbstractConfiguration。
+     * 这里子类只声明xml自己相关的属性。
+     */
     private final List<Status> status = new ArrayList<>();
     private Element rootElement;
     private boolean strict;
@@ -279,6 +284,26 @@ public class XmlConfiguration extends AbstractConfiguration implements Reconfigu
         return null;
     }
 
+    /**
+     * 这是一个递归方法，通过递归来遍历xml配置树。
+     * node是Log4j自定义的节点，element是xml的元素，它们也是具有一一对应的关系。
+     *
+     * 调用链：
+     * 	  at org.apache.logging.log4j.core.config.xml.XmlConfiguration.constructHierarchy(XmlConfiguration.java:283)
+     * 	  at org.apache.logging.log4j.core.config.xml.XmlConfiguration.setup(XmlConfiguration.java:257)
+     * 	  at org.apache.logging.log4j.core.config.AbstractConfiguration.initialize(AbstractConfiguration.java:247)
+     * 	  at org.apache.logging.log4j.core.config.AbstractConfiguration.start(AbstractConfiguration.java:295)
+     * 	  at org.apache.logging.log4j.core.LoggerContext.setConfiguration(LoggerContext.java:621)
+     * 	  at org.apache.logging.log4j.core.LoggerContext.reconfigure(LoggerContext.java:694)
+     * 	  at org.apache.logging.log4j.core.LoggerContext.reconfigure(LoggerContext.java:711)
+     * 	  at org.apache.logging.log4j.core.LoggerContext.start(LoggerContext.java:253)
+     * 	  at org.apache.logging.log4j.core.impl.Log4jContextFactory.getContext(Log4jContextFactory.java:245)
+     * 	  at org.apache.logging.log4j.core.impl.Log4jContextFactory.getContext(Log4jContextFactory.java:47)
+     * 	  at org.apache.logging.log4j.LogManager.getContext(LogManager.java:176)
+     * 	  at org.apache.logging.log4j.LogManager.getLogger(LogManager.java:666)
+     *
+     *
+     */
     private void constructHierarchy(final Node node, final Element element) {
         processAttributes(node, element);
         final StringBuilder buffer = new StringBuilder();
@@ -291,6 +316,9 @@ public class XmlConfiguration extends AbstractConfiguration implements Reconfigu
                 final String name = getType(child);
                 final PluginType<?> type = pluginManager.getPluginType(name);
                 final Node childNode = new Node(node, name, type);
+                /**
+                 * 在这里做递归
+                 */
                 constructHierarchy(childNode, child);
                 if (type == null) {
                     final String value = childNode.getValue();

@@ -21,6 +21,15 @@ import java.io.Serializable;
 import org.apache.logging.log4j.util.PerformanceSensitive;
 
 /**
+ *
+ * ReusableMessageFactory 生产三种类型的消息：
+ *
+ * ReusableParameterizedMessage
+ * ReusableSimpleMessage
+ * ReusableObjectMessage
+ *
+ * 消息可重用体现在，它把Message放到了线程本地变量中。
+ *
  * Implementation of the {@link MessageFactory} interface that avoids allocating temporary objects where possible.
  * Message instances are cached in a ThreadLocal and reused when a new message is requested within the same thread.
  * @see ParameterizedMessageFactory

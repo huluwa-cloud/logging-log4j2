@@ -95,6 +95,9 @@ public class Log4jContextFactory implements LoggerContextFactory, ShutdownCallba
         initializeShutdownCallbackRegistry();
     }
 
+    /**
+     * 在Log4jContextFactory构造方法中被调用。
+     */
     private static ContextSelector createContextSelector() {
         try {
             final ContextSelector selector = Loader.newCheckedInstanceOfProperty(Constants.LOG4J_CONTEXT_SELECTOR,
@@ -105,6 +108,9 @@ public class Log4jContextFactory implements LoggerContextFactory, ShutdownCallba
         } catch (final Exception e) {
             LOGGER.error("Unable to create custom ContextSelector. Falling back to default.", e);
         }
+        /**
+         * 默认是使用ClassLoaderContextSelector
+         */
         return new ClassLoaderContextSelector();
     }
 

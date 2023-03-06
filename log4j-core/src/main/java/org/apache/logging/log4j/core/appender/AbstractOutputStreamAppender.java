@@ -27,6 +27,11 @@ import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
 import org.apache.logging.log4j.core.util.Constants;
 
 /**
+ *
+ * 继承这个AbstractOutputStreamAppender的Appender，是一类的Appender。
+ * 这一类的Appender，都是将
+ *
+ *
  * Appends log events as bytes to a byte output stream. The stream encoding is defined in the layout.
  *
  * @param <M> The kind of {@link OutputStreamManager} under management

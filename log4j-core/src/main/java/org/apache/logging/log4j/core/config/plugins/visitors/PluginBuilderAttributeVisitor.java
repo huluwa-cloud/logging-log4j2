@@ -26,6 +26,11 @@ import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
 import org.apache.logging.log4j.util.StringBuilders;
 
 /**
+ *
+ *
+ * 注解@PluginBuilderAttribute的实现逻辑就是在这个类里面
+ *
+ *
  * PluginVisitor for PluginBuilderAttribute. If {@code null} is returned for the
  * {@link #visit(org.apache.logging.log4j.core.config.Configuration, org.apache.logging.log4j.core.config.Node, org.apache.logging.log4j.core.LogEvent, StringBuilder)}
  * method, then the default value of the field should remain untouched.

@@ -274,6 +274,13 @@ public final class RollingFileAppender extends AbstractOutputStreamAppender<Roll
     private Object advertisement;
     private final Advertiser advertiser;
 
+    /**
+     *
+     * 看清楚了，构造器是私有的。
+     * 只能在这个类里面被builder的build方法所调用了。
+     * 所以外界创建RollingFileAppender一定是通过builder来创建的。
+     *
+     */
     private RollingFileAppender(final String name, final Layout<? extends Serializable> layout, final Filter filter,
             final RollingFileManager manager, final String fileName, final String filePattern,
             final boolean ignoreExceptions, final boolean immediateFlush, final Advertiser advertiser,

@@ -24,6 +24,9 @@ import org.apache.logging.log4j.core.config.plugins.processor.PluginEntry;
  *
  * @param <T> The plug-in class, which can be any kind of class.
  * @see org.apache.logging.log4j.core.config.plugins.Plugin
+ *
+ * M
+ *
  */
 public class PluginType<T> {
 

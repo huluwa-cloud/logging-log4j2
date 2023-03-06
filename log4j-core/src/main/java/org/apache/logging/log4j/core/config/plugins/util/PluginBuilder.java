@@ -17,17 +17,6 @@
 
 package org.apache.logging.log4j.core.config.plugins.util;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -45,6 +34,17 @@ import org.apache.logging.log4j.core.util.ReflectionUtil;
 import org.apache.logging.log4j.core.util.TypeUtil;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.apache.logging.log4j.util.StringBuilders;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Builder class to instantiate and configure a Plugin object using a PluginFactory method or PluginBuilderFactory
@@ -107,6 +107,10 @@ public class PluginBuilder implements Builder<Object> {
     }
 
     /**
+     *
+     * 在这里build出plugin实例对象。
+     * 那些Appender都是Plugin，也是从这里build出去的
+     *
      * Builds the plugin object.
      *
      * @return the plugin object or {@code null} if there was a problem creating it.
@@ -149,19 +153,41 @@ public class PluginBuilder implements Builder<Object> {
         Objects.requireNonNull(this.node, "No Node object was set.");
     }
 
+    /**
+     * 注解@PluginBuilderFactory的实现逻辑代码在这里
+     */
     private static Builder<?> createBuilder(final Class<?> clazz)
-        throws InvocationTargetException, IllegalAccessException {
+            throws InvocationTargetException, IllegalAccessException {
+        // 遍历类声明的所有方法
         for (final Method method : clazz.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(PluginBuilderFactory.class) &&
-                Modifier.isStatic(method.getModifiers()) &&
-                TypeUtil.isAssignable(Builder.class, method.getReturnType())) {
+            // 如果方法
+            // 1）使用了PluginBuilderFactory做注解，
+            // 2）并且是静态方法
+            // 3）返回值是log4j2定义的Builder类型
+            //
+            // 那么就通过反射来做调用。
+            if (
+                    method.isAnnotationPresent(PluginBuilderFactory.class)
+                    &&
+                    Modifier.isStatic(method.getModifiers())
+                    &&
+                    TypeUtil.isAssignable(Builder.class, method.getReturnType())
+            ) {
+
                 ReflectionUtil.makeAccessible(method);
                 return (Builder<?>) method.invoke(null);
+
             }
         }
         return null;
     }
 
+    /**
+     *
+     * 通过反射为Plugin的Builder实例的字段设值
+     *
+     *
+     */
     private void injectFields(final Builder<?> builder) throws IllegalAccessException {
         final List<Field> fields = TypeUtil.getAllDeclaredFields(builder.getClass());
         AccessibleObject.setAccessible(fields.toArray(EMPTY_FIELD_ARRAY), true);
@@ -176,17 +202,14 @@ public class PluginBuilder implements Builder<Object> {
                 if (a instanceof PluginAliases) {
                     continue; // already processed
                 }
-                final PluginVisitor<? extends Annotation> visitor =
-                    PluginVisitors.findVisitor(a.annotationType());
+                final PluginVisitor<? extends Annotation> visitor = PluginVisitors.findVisitor(a.annotationType());
                 if (visitor != null) {
                     final Object value = visitor.setAliases(aliases)
-                        .setAnnotation(a)
-                        .setConversionType(field.getType())
-                        .setStrSubstitutor(event == null
-                                ? configuration.getConfigurationStrSubstitutor()
-                                : configuration.getStrSubstitutor())
-                        .setMember(field)
-                        .visit(configuration, node, event, log);
+                            .setAnnotation(a)
+                            .setConversionType(field.getType())
+                            .setStrSubstitutor(event == null ? configuration.getConfigurationStrSubstitutor() : configuration.getStrSubstitutor())
+                            .setMember(field)
+                            .visit(configuration, node, event, log);
                     // don't overwrite default values if the visitor gives us no value to inject
                     if (value != null) {
                         field.set(builder, value);

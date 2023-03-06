@@ -771,6 +771,8 @@ public class XmlConfiguration extends Log4j1Configuration {
                 case LOGGER_FACTORY_TAG:
                     LOGGER.warn("Log4j 1 logger factories are not supported by Log4j 2 and will be ignored.");
                     break;
+
+                // 在这里解析appender标签
                 case APPENDER_TAG:
                     Appender appender = parseAppender(currentElement);
                     appenderMap.put(appender.getName(), appender);

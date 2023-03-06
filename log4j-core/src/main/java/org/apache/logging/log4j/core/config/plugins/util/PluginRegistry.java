@@ -43,6 +43,9 @@ import org.apache.logging.log4j.util.Strings;
 
 /**
  * Registry singleton for PluginType maps partitioned by source type and then by category names.
+ *
+ *
+ *
  */
 public class PluginRegistry {
 
@@ -53,6 +56,11 @@ public class PluginRegistry {
 
     /**
      * Contains plugins found in Log4j2Plugins.dat cache files in the main CLASSPATH.
+     *
+     * Map逻辑结构：
+     * 集合名称-->插件类型名称的List
+     *
+     * 名称：plugins[By][CategoryRef]，也就是集合根据[集合名称]划分
      */
     private final AtomicReference<Map<String, List<PluginType<?>>>> pluginsByCategoryRef =
         new AtomicReference<>();

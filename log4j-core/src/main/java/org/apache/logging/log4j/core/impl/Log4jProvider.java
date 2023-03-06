@@ -19,6 +19,9 @@ package org.apache.logging.log4j.core.impl;
 import org.apache.logging.log4j.spi.Provider;
 
 /**
+ *
+ * Mark
+ *
  * Binding for the Log4j API.
  */
 public class Log4jProvider extends Provider {

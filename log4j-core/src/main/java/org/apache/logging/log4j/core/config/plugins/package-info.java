@@ -17,5 +17,9 @@
 
 /**
  * Annotations for Log4j 2 plugins.
+ *
+ * 整个包的代码，都是用于处理 log4j的plugin相关的注解的
+ *
+ *
  */
 package org.apache.logging.log4j.core.config.plugins;

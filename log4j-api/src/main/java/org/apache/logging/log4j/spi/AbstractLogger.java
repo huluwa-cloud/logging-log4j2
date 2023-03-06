@@ -1864,9 +1864,14 @@ public abstract class AbstractLogger implements ExtendedLogger, LocationAwareLog
     @Override
     public void logIfEnabled(final String fqcn, final Level level, final Marker marker, final Supplier<?> messageSupplier,
             final Throwable throwable) {
+
+        // isEnabled方法是一个钩子方法，在子类中实现
         if (isEnabled(level, marker, messageSupplier, throwable)) {
+
             logMessage(fqcn, level, marker, messageSupplier, throwable);
+
         }
+
     }
 
     @Override
@@ -2114,6 +2119,7 @@ public abstract class AbstractLogger implements ExtendedLogger, LocationAwareLog
 
     protected void log(final Level level, final Marker marker, final String fqcn, final StackTraceElement location,
         final Message message, final Throwable throwable) {
+        // logMessage是一个钩子方法
         logMessage(fqcn, level, marker, message, throwable);
     }
 
@@ -2155,7 +2161,9 @@ public abstract class AbstractLogger implements ExtendedLogger, LocationAwareLog
                                           final Message message,
                                           final Throwable throwable) {
         try {
+            // 处理递归深度
             incrementRecursionDepth(); // LOG4J2-1518, LOG4J2-2031
+
             tryLogMessage(fqcn, getLocation(fqcn), level, marker, message, throwable);
         } finally {
             decrementRecursionDepth();

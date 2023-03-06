@@ -32,6 +32,9 @@ import org.apache.logging.log4j.util.Strings;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.FIELD})
+
+// 注意：@PluginBuilderAttribute注解被@PluginVisitorStrategy所注解了
+
 @PluginVisitorStrategy(PluginBuilderAttributeVisitor.class)
 public @interface PluginBuilderAttribute {
 

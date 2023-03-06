@@ -18,5 +18,10 @@
 /**
  * Internal utility classes for the Log4j 2 API. Note that the use of any classes in this package is not supported.
  * There are no guarantees for binary or logical compatibility in this package.
+ *
+ * 给Log4j2 API [内部]使用的工具类。注意，是内部使用的。
+ * 官方建议，使用开发者不要使用这util包中的任何类。
+ * 因为官方不保证这个包的binary或者逻辑的兼容。
+ * （也就是官方随时可能改这个包里面的类或者逻辑，它不保证对旧版本的兼容性）
  */
 package org.apache.logging.log4j.util;

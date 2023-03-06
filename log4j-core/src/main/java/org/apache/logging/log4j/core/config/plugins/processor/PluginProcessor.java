@@ -57,6 +57,9 @@ public class PluginProcessor extends AbstractProcessor {
     /**
      * The location of the plugin cache data file. This file is written to by this processor, and read from by
      * {@link org.apache.logging.log4j.core.config.plugins.util.PluginManager}.
+     *
+     * 这个文件是编译期的时候写的。
+     *
      */
     public static final String PLUGIN_CACHE_FILE =
             "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat";
@@ -113,6 +116,11 @@ public class PluginProcessor extends AbstractProcessor {
         }
     }
 
+    /**
+     * 写缓存文件 "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat"
+     *
+     *
+     */
     private void writeCacheFile(final Element... elements) throws IOException {
         final FileObject fileObject = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, Strings.EMPTY,
                 PLUGIN_CACHE_FILE, elements);

@@ -28,15 +28,35 @@ import org.apache.logging.log4j.message.MessageFactory;
 
 /**
  * Convenience class to be used by {@code LoggerContext} implementations.
+ *
+ * LoggerRegistry。看名字，Registry，注册处。这个命名，就知道它是一个各种Logger的缓存容器。（看spring就知道）
+ * 它也确实用了Map来做各种Logger的缓存（一般也用Map了）。
+ *
+ *
  */
 public class LoggerRegistry<T extends ExtendedLogger> {
     private static final String DEFAULT_FACTORY_KEY = AbstractLogger.DEFAULT_MESSAGE_FACTORY_CLASS.getName();
+    /**
+     *
+     * 抽象工厂模式的应用，用来生成下面Map容器的工厂，决定用的种类型的容器。
+     * MapFactory的两个实现，ConcurrentMapFactory和WeakMapFactory，其实都是以静态内部类的方式定义在本类中。
+     * 我们基本都使用的ConcurrentMapFactory(这也是LoggerRegistry无参构造器默认的)
+     */
     private final MapFactory<T> factory;
+    /**
+     * 这个Map容器的数据逻辑结构是： MessageFactory(OuterMap)-->Logger Name-->Logger
+     */
     private final Map<String, Map<String, T>> map;
 
+    // LoggerRegistry用到的MapFactory接口以及它的两个实现接口，都是定义在LoggerRegistry。
+    // 内聚性是真的高，哈哈哈哈哈！
+    // ===================================================================================================
     /**
-     * Interface to control the data structure used by the registry to store the Loggers.
+     * Interface to control the data structure used by the registry to [store the Loggers].
      * @param <T> subtype of {@code ExtendedLogger}
+     *
+     * 哈哈，官方也说了，Registry创建的数据接口，就是为了用来store各种Loggers的。
+     *
      */
     public interface MapFactory<T extends ExtendedLogger> {
         Map<String, T> createInnerMap();
@@ -87,6 +107,7 @@ public class LoggerRegistry<T extends ExtendedLogger> {
             innerMap.put(name, logger);
         }
     }
+    // ==================================================================================================
 
     public LoggerRegistry() {
         this(new ConcurrentMapFactory<T>());
